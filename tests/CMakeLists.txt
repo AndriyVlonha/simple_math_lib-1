@@ -2,19 +2,16 @@ include(FetchContent)
 
 FetchContent_Declare(
   googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.11.0
+  URL https://github.com/google/googletest/archive/refs/tags/release-1.15.0.zip
 )
 FetchContent_MakeAvailable(googletest)
-add_library(GTest::GTest INTERFACE IMPORTED)
-target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
-include_directories(${CMAKE_SOURCE_DIR}/src/math_lib/include)
+# Тестовий виконуваний файл
 add_executable(MathLibUnitTests math_library_tests.cpp)
-
 target_link_libraries(MathLibUnitTests
- PRIVATE
-  GTest::GTest
-  math_library)
-
-add_test(math_library_gtests MathLibUnitTests)
+    PRIVATE
+        gtest_main
+        math_library
+)
+enable_testing()
+add_test(NAME math_library_gtests COMMAND MathLibUnitTests)
