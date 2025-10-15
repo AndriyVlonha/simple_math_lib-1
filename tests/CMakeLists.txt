@@ -2,16 +2,17 @@ include(FetchContent)
 
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/refs/tags/release-1.15.0.zip
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        release-1.14.0  
 )
 FetchContent_MakeAvailable(googletest)
 
-# Тестовий виконуваний файл
 add_executable(MathLibUnitTests math_library_tests.cpp)
 target_link_libraries(MathLibUnitTests
-    PRIVATE
-        gtest_main
-        math_library
+  PRIVATE
+    gtest_main
+    math_library
 )
+
 enable_testing()
 add_test(NAME math_library_gtests COMMAND MathLibUnitTests)
