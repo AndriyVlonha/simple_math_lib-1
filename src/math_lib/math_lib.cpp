@@ -42,5 +42,13 @@ namespace MathLib
 		if (b == 0) return a;
 		return GCD(b, a % b);
 	}
+    double thirdAngle(double a, double b)
+    {
+        // Перевірка на неможливі кути (сума кутів має бути менше 180)
+        if (a <= 0 || b <= 0 || a + b >= 180.0) {
+            throw std::invalid_argument("Invalid angle values: angles must be positive and their sum less than 180.");
+        }
+        return 180.0 - a - b;
+    }
 }
 
