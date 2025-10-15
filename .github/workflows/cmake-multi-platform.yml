@@ -13,56 +13,50 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Release]
+        
         include:
+          # Windows
           - os: windows-latest
-            build_type: Release
-            c_compiler: cl
+            compiler: cl
             cpp_compiler: cl
+          # Ubuntu (GCC)
           - os: ubuntu-latest
-            build_type: Release
-            c_compiler: gcc
+            compiler: gcc
             cpp_compiler: g++
+          # Ubuntu (Clang)
           - os: ubuntu-latest
-            build_type: Release
-            c_compiler: clang
+            compiler: clang
             cpp_compiler: clang++
+          # macOS (Clang)
           - os: macos-latest
-            build_type: Release
-            c_compiler: clang
+            compiler: clang
             cpp_compiler: clang++
+
+
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set reusable strings
-        id: strings
-        shell: bash
-        run: |
-          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      - name: Configure CMake
-        run: >
-          cmake -B ${{ steps.strings.outputs.build-output-dir }}
-          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -S ${{ github.workspace }}
+    - name: Configure CMake
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        # Змінюємо c_compiler на compiler (новий ключ у include)
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.compiler }} 
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -S ${{ github.workspace }}
 
-      - name: Build
-        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-      - name: Test (verbose, show failing test output)
-        working-directory: ${{ steps.strings.outputs.build-output-dir }}
-        run: |
-          ctest --rerun-failed --output-on-failure -C ${{ matrix.build_type }} -V || true
-          echo "---- LastTest.log ----"
-          if [ -f Testing/Temporary/LastTest.log ]; then
-            sed -n '1,200p' Testing/Temporary/LastTest.log || true
-            echo "---- end of LastTest.log ----"
-          else
-            echo "No LastTest.log found"
-          fi
-          # fail job if tests failed
-          if [ -f Testing/Temporary/LastTest.log ] && grep -q "0% tests passed" Testing/Temporary/LastTest.log 2>/dev/null; then
-            exit 1
-          fi
+    - name: Test
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
