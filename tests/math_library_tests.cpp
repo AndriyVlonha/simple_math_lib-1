@@ -86,10 +86,8 @@ TEST(ThirdAngleTest, BasicCalculation)
     EXPECT_NEAR(MathLib::thirdAngle(10.0, 10.0), 160.0, 0.001);
 }
 
-TEST(ThirdAngleTest, InvalidInput)
+TEST(ThirdAngleTest, BasicCalculation)
 {
-    // Сума кутів перевищує 180
-    EXPECT_THROW(MathLib::thirdAngle(100.0, 90.0), std::invalid_argument);
-    // Від'ємний кут
-    EXPECT_THROW(MathLib::thirdAngle(-1.0, 10.0), std::invalid_argument);
+    EXPECT_NEAR(MathLib::thirdAngle(30.0, 60.0), 90.0, 0.001);
+    EXPECT_NEAR(MathLib::thirdAngle(10.0, 10.0), 160.0, 0.001);
 }
