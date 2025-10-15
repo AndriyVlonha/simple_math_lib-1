@@ -6,41 +6,55 @@ namespace MathLib
 {
     bool isEqual(double a, double b, double tolerance)
     {
-        return abs(a - b) <= tolerance;
+        return std::fabs(a - b) <= tolerance;
     }
 
     bool isPrime(int n)
     {
-        if (n <= 1)
-            return false;
-        
-        for (int i = 2; i * i <= n; i++)
+        if (n <= 1) return false;
+        if (n <= 3) return true;
+        if (n % 2 == 0) return false;
+        for (int i = 3; i * i <= n; i += 2)
         {
-            if (n % i == 0)
-                return false;        
+            if (n % i == 0) return false;
         }
         return true;
     }
 
-    int leastCommonMultiple(int a, int b)
-    {
-        int lcm = 1;
-        int maxNum = std::max(a, b);
-        for (int i = maxNum; i <= a * b; i += maxNum)
-        {
-            if (i % a == 0 && i % b == 0)
-            {
-                lcm = i;
-                break;
-            }
-        }
-        return lcm;
-    }
-
     int GCD(int a, int b)
     {
-		if (b == 0) return a;
-		return GCD(b, a % b);
-	}
-}
+        if (a < 0) a = -a;
+        if (b < 0) b = -b;
+        while (b != 0)
+        {
+            int t = b;
+            b = a % b;
+            a = t;
+        }
+        return a;
+    }
 
+    int leastCommonMultiple(int a, int b)
+    {
+        if (a == 0 || b == 0) return 0;
+        int gcd = GCD(a, b);
+        // prevent overflow by using long long for product
+        long long prod = 1LL * a / gcd * b;
+        return static_cast<int>(std::llabs(prod));
+    }
+
+    int fibonacci(int n)
+    {
+        if (n < 0) throw std::invalid_argument("Negative fibonacci index");
+        if (n == 0) return 0;
+        if (n == 1) return 1;
+        int a = 0, b = 1;
+        for (int i = 2; i <= n; ++i)
+        {
+            int c = a + b;
+            a = b;
+            b = c;
+        }
+        return b;
+    }
+}

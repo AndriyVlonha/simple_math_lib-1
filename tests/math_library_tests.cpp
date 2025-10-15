@@ -9,12 +9,12 @@ protected:
 
     void SetUp() override
     {
-		// Do some job before test run
+        // Do some job before test run
     }
 
     void TearDown() override
     {
-		// Do some job after test run
+        // Do some job after test run
     }
 };
 
@@ -76,4 +76,13 @@ TEST_F(MathLibTestFixture, IsPrimeTest)
 TEST_F(MathLibTestFixture, GreatestCommonDivider)
 {
     EXPECT_EQ(MathLib::GCD(10, 6), 2);
+}
+
+// ВАРІАНТ 2: Тест для функції Фібоначчі
+TEST(FibonacciTest, HandlesPositiveInput) {
+    EXPECT_EQ(MathLib::fibonacci(0), 0);
+    EXPECT_EQ(MathLib::fibonacci(1), 1);
+    EXPECT_EQ(MathLib::fibonacci(2), 1);
+    EXPECT_EQ(MathLib::fibonacci(9), 34);
+    EXPECT_EQ(MathLib::fibonacci(10), 55);
 }
