@@ -14,38 +14,28 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Release]
         
         include:
+          # Windows
           - os: windows-latest
-            build_type: Release
-            c_compiler: cl
+            compiler: cl
             cpp_compiler: cl
+          # Ubuntu (GCC)
           - os: ubuntu-latest
-            build_type: Release
-            c_compiler: gcc
+            compiler: gcc
             cpp_compiler: g++
+          # Ubuntu (Clang)
           - os: ubuntu-latest
-            build_type: Release
-            c_compiler: clang
+            compiler: clang
             cpp_compiler: clang++
+          # macOS (Clang)
           - os: macos-latest
-            build_type: Release
-            c_compiler: clang
+            compiler: clang
             cpp_compiler: clang++
 
-        exclude:
-          - os: windows-latest
-            c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
-          - os: ubuntu-latest
-            c_compiler: cl
-          - os: macos-latest
-            c_compiler: gcc
-          - os: macos-latest
-            c_compiler: cl
-            
-    steps: # <--- ЦЕЙ РІВЕНЬ ВІДСТУПУ ВИПРАВЛЕНО
+
+    steps:
     - uses: actions/checkout@v4
 
     - name: Set reusable strings
@@ -57,15 +47,15 @@ jobs:
     - name: Configure CMake
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        # Змінюємо c_compiler на compiler (новий ключ у include)
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.compiler }} 
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Test (verbose, show failing test output)
+    - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      # Використовуємо --output-on-failure
       run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
