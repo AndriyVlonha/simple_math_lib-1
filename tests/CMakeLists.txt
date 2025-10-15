@@ -6,7 +6,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# Тестовий виконуваний файл
 add_executable(MathLibUnitTests math_library_tests.cpp)
 target_link_libraries(MathLibUnitTests
     PRIVATE
