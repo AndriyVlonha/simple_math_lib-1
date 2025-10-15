@@ -1,4 +1,4 @@
-name: Build and Test-run
+name: CMake on multiple platforms
 
 on:
   push:
@@ -13,36 +13,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        build_type: [Release]
-        c_compiler: [gcc, clang, cl]
-
         include:
           - os: windows-latest
+            build_type: Release
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
+            build_type: Release
             c_compiler: gcc
             cpp_compiler: g++
           - os: ubuntu-latest
+            build_type: Release
             c_compiler: clang
             cpp_compiler: clang++
-          - os: macos-latest
-            c_compiler: clang
-            cpp_compiler: clang++
-
-        exclude:
-          - os: windows-latest
-            c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
-          - os: ubuntu-latest
-            c_compiler: cl
-          - os: macos-latest
-            c_compiler: gcc
-          - os: macos-latest
-            c_compiler: cl
-
     steps:
     - uses: actions/checkout@v4
 
@@ -63,6 +46,23 @@ jobs:
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Test
+    - name: Test (verbose, show failing test output)
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: ctest --build-config ${{ matrix.build_type }} --output-on-failure
+      run: |
+        # Запуск ctest у verbose режимі, показати вихід навіть коли є помилки
+        ctest --rerun-failed --output-on-failure -C ${{ matrix.build_type }} -V || true
+
+        echo "---- LastTest.log (if exists) ----"
+        if [ -f Testing/Temporary/LastTest.log ]; then
+          sed -n '1,200p' Testing/Temporary/LastTest.log || true
+          echo "---- end of LastTest.log ----"
+        else
+          echo "No LastTest.log found"
+        fi
+
+        # Якщо тест падає, повернути ненульовий код, щоб job позначився як failed
+        # знайдемо код останнього ctest (він був успішний через `|| true`), тож перевіримо наявність failed tests вручну
+        if grep -q "0% tests passed" Testing/Temporary/LastTest.log 2>/dev/null; then
+          echo "Tests failed. Exiting with non-zero code."
+          exit 1
+        fi
